@@ -73,10 +73,14 @@ class NovaPlugin(base.Base):
                 data_tenant['quotas'][item] = getattr(quotas, item)
 
         # Cluster allocation / reserved values
-        for item in ('AllocationRatioCores', 'AllocationRatioRam',
-                'ReservedNodeCores', 'ReservedNodeRamMB',
-                'ReservedCores', 'ReservedRamMB'):
-            data[self.prefix]['cluster']['config'][item] = getattr(self, item)
+        #for item in ('AllocationRatioCores', 'AllocationRatioRam',
+        #        'ReservedNodeCores', 'ReservedNodeRamMB',
+        #        'ReservedCores', 'ReservedRamMB'):
+        #    data[self.prefix]['cluster']['config'][item] = getattr(self, item)
+        cluster_stat = client.hypervisors.statistics()
+        for item in ('free_ram_mb', 'memory_mb', 'memory_mb_used',
+                    'running_vms', 'vcpus', 'vcpus_used'):
+            data[self.prefix]['cluster']['config'][item] = getattr(cluster_stat, item)
 
         # Hypervisor information
         hypervisors = client.hypervisors.list()
@@ -87,14 +91,6 @@ class NovaPlugin(base.Base):
                     'hypervisor_version', 'memory_mb', 'memory_mb_used',
                     'running_vms', 'vcpus', 'vcpus_used'):
                 data[self.prefix][name][item] = getattr(hypervisor, item)
-            data[self.prefix][name]['memory_mb_overcommit'] = \
-                data[self.prefix][name]['memory_mb'] * data[self.prefix]['cluster']['config']['AllocationRatioRam']
-            data[self.prefix][name]['memory_mb_overcommit_withreserve'] = \
-                data[self.prefix][name]['memory_mb_overcommit'] - data[self.prefix]['cluster']['config']['ReservedNodeRamMB']
-            data[self.prefix][name]['vcpus_overcommit'] = \
-                data[self.prefix][name]['vcpus'] * data[self.prefix]['cluster']['config']['AllocationRatioCores']
-            data[self.prefix][name]['vcpus_overcommit_withreserve'] = \
-                data[self.prefix][name]['vcpus_overcommit'] - data[self.prefix]['cluster']['config']['ReservedNodeCores']
 
         return data
 

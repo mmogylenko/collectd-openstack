@@ -92,9 +92,8 @@ class NeutronPlugin(base.Base):
                 data_tenant = data[self.prefix]["tenant-%s" % tenants[quota['tenant_id']]]
             except KeyError:
                 continue
-            for item in ('floatingip', 'ikepolicy', 'ipsec_site_connection',
-                  'ipsecpolicy', 'network', 'port', 'router',
-                  'security_group', 'security_group_rule', 'subnet'):
+            for item in ('floatingip', 'network', 'port', 'router',
+                         'security_group', 'security_group_rule', 'subnet'):
                 data_tenant['quotas'][item] = quota[item]
 
         return data
